@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>油脂油料期货季节性看板 · 项目交接与对话记录</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;max-width:920px;margin:24px auto;padding:0 20px;color:#1c2733;line-height:1.7;background:#fff}
+  h1{font-size:24px;border-bottom:3px solid #2f6fed;padding-bottom:10px}
+  h2{font-size:19px;margin-top:34px;color:#2f6fed;border-left:5px solid #2f6fed;padding-left:10px}
+  h3{font-size:15px;margin-top:20px;color:#23303d}
+  code{background:#eef2f6;padding:2px 6px;border-radius:4px;font-size:13px;color:#b33939}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px}
+  th,td{border:1px solid #d4dbe3;padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#f3f6fa}
+  .ok{color:#1a8a3c;font-weight:700}
+  .note{background:#fff8e6;border:1px solid #f0d98a;border-radius:8px;padding:12px 14px;margin:14px 0;font-size:13.5px}
+  .box{background:#f6f9ff;border:1px solid #cfe0ff;border-radius:10px;padding:14px 18px;margin:14px 0}
+  ul{margin:8px 0 8px 4px;padding-left:22px}
+  li{margin:5px 0}
+  .muted{color:#6b7a89;font-size:12.5px}
+</style>
+</head>
+<body>
+<h1>油脂油料期货季节性看板 · 项目交接与对话记录</h1>
+<p class="muted">生成日期：2026-09-15 ｜ 数据截至 2026-09-13 15:25 ｜ 制作：WorkBuddy</p>
+
+<div class="note">📌 <b>这份文档是离线可读的「精华版对话记录」。</b> WorkBuddy 里逐字的聊天历史存在云端（你登录同一账号在另一台也可能看到），但为保证明天在另一台电脑<b>不依赖网络</b>也能回顾我们改了什么、怎么继续，我把关键决策全部整理在此。真正的看板文件是 <code>油脂油料期货季节性看板.html</code>（双击即可离线打开）。</p>
+
+<h2>一、项目是什么</h2>
+<p>一个<strong>油脂油料期货季节性看板</strong>，参照此前「生猪期货价格季节性看板」的格式，覆盖 6 个品种：<b>豆粕(m) / 豆油(y) / 豆二(b) / 棕榈油(p) / 菜油(OI) / 菜粕(RM)</b>。所有历史数据内嵌在 HTML 里，图表用 ECharts 渲染，<b>完全自包含、可离线打开</b>。</p>
+
+<h2>二、文件清单（都在压缩包里）</h2>
+<table>
+<tr><th>文件</th><th>用途</th></tr>
+<tr><td><code>油脂油料期货季节性看板.html</code></td><td><b>主看板</b>，双击离线打开。含全部 151 张图 + 内嵌数据 + 内嵌 ECharts</td></tr>
+<tr><td><code>build_dashboard.py</code></td><td>构建脚本：抓取新浪数据 + 计算 + 生成 HTML。改任何规则后重跑它即可</td></tr>
+<tr><td><code>echarts.min.js</code></td><td>ECharts 库（已内嵌进 HTML，此文件为备份）</td></tr>
+<tr><td><code>.workbuddy/memory/MEMORY.md</code></td><td>项目长期记忆（验收要点、规则）</td></tr>
+<tr><td><code>.workbuddy/memory/2026-09-12.md</code></td><td>当日详细日志 + 「如何恢复本项目」</td></tr>
+<tr><td><code>.workbuddy/memory/2026-09-15.md</code></td><td>GitHub 尝试与改为打包的过程</td></tr>
+<tr><td><code>.workbuddy/automations/...</code></td><td>每日 15:25 自动更新的自动化配置记录</td></tr>
+</table>
+
+<h2>三、看板三个界面</h2>
+<table>
+<tr><th>一级界面</th><th>二级标题（点击一级才显示）</th><th>内容</th></tr>
+<tr><td>① 绝对价格季节性</td><td>豆粕 / 豆油 / 豆二 / 棕榈油 / 菜油 / 菜粕</td><td>各品种<b>有交易的月份</b>合约收盘价季节性图（已删无数据的空月份）</td></tr>
+<tr><td>② 月差季节性</td><td>同上 6 品种</td><td>各品种指定月差对的季节性图</td></tr>
+<tr><td>③ 品种间价差季节性</td><td>豆粕−菜粕 / 豆油−菜油 / 菜油−棕榈油 / 豆油−棕榈油 / 内盘大豆榨利</td><td>跨品种价差季节性图</td></tr>
+</table>
+
+<h2>四、你的修改意见与落实（逐条）</h2>
+<h3>第 1 轮（初始制作后）</h3>
+<ul>
+<li><span class="ok">✓</span> 取消历届均值线（不再画均值）</li>
+<li><span class="ok">✓</span> 三个界面分开展示（点「月差季节性」只显示月差图，不再同屏）</li>
+<li><span class="ok">✓</span> 横轴取<b>真实交易区间</b>而非 1–12 月顺序排列。例：豆粕 7-9 月差 = 9月（09合约上市）→ 次年7月（07合约结束），跨年连续、无空档</li>
+<li><span class="ok">✓</span> 图例每年曲线可单独选中（历史届 + 在市届都进图例，可逐条开关）</li>
+<li><span class="ok">✓</span> 图例改名用合约代码 2 位年：<code>M2701</code> / <code>Y2609</code> / <code>RM2707</code> / <code>OI2609</code></li>
+<li><span class="ok">✓</span> 去掉重复标题（ECharts 内部不再画 title，只留卡片头部一行）</li>
+</ul>
+<h3>第 2 轮</h3>
+<ul>
+<li><span class="ok">✓</span> 卡片标题下方「元/吨」去掉</li>
+<li><span class="ok">✓</span> 图例字号 11→10、去掉翻页、自动换行同屏显示</li>
+<li><span class="ok">✓</span> 月差图例改 <code>M2701-2703</code> 格式（近月-远月，跨年远月年份 +1）</li>
+<li><span class="ok">✓</span> 品种间图例改 <code>M2701-RM2701</code> 格式；压榨套利 <code>M2701·Y2701·B2701</code></li>
+</ul>
+<h3>第 3 轮</h3>
+<ul>
+<li><span class="ok">✓</span> 纵轴「元/吨」移到<b>标题后方</b>（浅灰小字，字号色号不变）</li>
+<li><span class="ok">✓</span> 一级标题下增<b>二级标题</b>，点击一级才显示二级（见第三节）</li>
+<li><span class="ok">✓</span> 数据源说明：新浪仅回溯到 2018/2019，无法更早</li>
+<li><span class="ok">✓</span> 绝对价格增加<b>除主力外的其他月份</b>合约图（见第四节备注）</li>
+</ul>
+<h3>第 4 轮（最新）</h3>
+<ul>
+<li><span class="ok">✓</span> 删除「调不到收盘价」的空合约图（合约本就不存在）</li>
+<li><span class="ok">✓</span> 压榨套利改名为 <b>「内盘大豆榨利」</b>，每张图标题旁灰色小字备注 <code>(78.5手豆粕+18.5手豆油-100手豆二)</code></li>
+</ul>
+
+<div class="note">🧹 <b>绝对价格被删的空月份</b>（全年份无数据=合约不存在）：豆粕/豆油删 02·04·06·10；菜油删 02·04·06·08·10·12；菜粕删 02·04·06·10·12；豆二/棕榈油 12 个月都保留。绝对价格图从 72 张降到 53 张。</div>
+
+<h2>五、月差 / 品种间价差配对</h2>
+<h3>月差</h3>
+<ul>
+<li><b>豆粕 / 豆油</b>：1-3、3-5、5-7、7-9、8-9、9-11、11-1、12-1、1-5、5-9、9-1（11 对）</li>
+<li><b>菜粕 / 菜油</b>：1-3、3-5、5-7、7-9、9-11、11-1、1-5、5-9、9-1（9 对）</li>
+<li><b>棕榈油 / 豆二</b>：1-5、5-9、9-1、2-5、3-5、4-5、6-9、7-9、8-9、10-1、11-1、12-1（12 对）</li>
+</ul>
+<h3>品种间价差</h3>
+<ul>
+<li>豆粕−菜粕、豆油−菜油、菜油−棕榈油：看 1·3·5·7·9·11 月</li>
+<li>豆油−棕榈油：看 1·3·5·7·8·9·11·12 月</li>
+<li>内盘大豆榨利（78.5豆粕+18.5豆油−100豆二）：看 1·3·5·7·8·9·11·12 月</li>
+</ul>
+
+<h2>六、如何恢复 / 继续改</h2>
+<div class="box">
+<p><b>改任何图或规则</b>，只改 <code>build_dashboard.py</code> 后重跑：</p>
+<code>cd 项目目录 &amp;&amp; python3 build_dashboard.py</code>
+<p class="muted">（用托管 Python：<code>/Users/hazeljin/.workbuddy/binaries/python/versions/3.13.12/bin/python3</code>，需先建 venv 装依赖——本脚本仅用标准库，可直接跑）</p>
+<p>重跑会重新抓取新浪数据 + 生成 <code>油脂油料期货季节性看板.html</code>（同时复制到 ~/Desktop）。全部历史「如何恢复」见 <code>.workbuddy/memory/2026-09-12.md</code>。</p>
+</div>
+
+<h2>七、数据源与限制</h2>
+<ul>
+<li>数据源：<b>新浪期货日线接口</b>（免费）。你最初给的 <code>HTFC_API_KEY=undefined</code> / <code>HTFC_BASE_URL=https://ent.htfc.com</code> 都是占位符，未启用，也未从那个地址装任何技能（安全红线）。</li>
+<li>历史回溯：新浪仅保留到 <b>2018/2019 年</b>（2017 及更早返回空），故展示的 2019–2027 即全部可调历史，无法更早。</li>
+<li>若以后要更长历史或实时性更强：接付费源（有效 HTFC / Wind / Tushare 凭证），把 <code>build_dashboard.py</code> 的抓取段换掉即可。</li>
+</ul>
+
+<h2>八、每日自动更新</h2>
+<p>已建自动化 <code>automation-1789206245736</code>，<b>每日 15:25</b> 重跑构建脚本，15:30 前完成刷新。仅在这台 Mac 运行；另一台要自动更新需重新配置。</p>
+
+<h2>九、为什么是打包而不是 GitHub</h2>
+<p>原计划把项目推到 GitHub 以便另一台 clone，但本机命令行无 GitHub 凭证（网页登录不算），且尝试时 <b>GitHub 被墙无法访问</b>。遂改为：把整个项目（含本交接文档）打成 zip，明天用 U 盘 / AirDrop / 网盘 拷到另一台解压即可。</p>
+
+<h2>十、明天在另一台怎么用</h2>
+<ol>
+<li>把 <code>油脂油料期货季节性看板-项目打包.zip</code> 拷到另一台电脑（U 盘 / AirDrop / 微信文件传输 / 网盘）。</li>
+<li>解压，双击 <code>油脂油料期货季节性看板.html</code> → 浏览器离线打开看面板（<b>无需网络、无需装任何东西</b>）。</li>
+<li>想回顾我们改了什么 → 打开本文件 <code>油脂油料期货季节性看板-项目交接与对话记录.html</code>。</li>
+<li>想在另一台继续改 + 保留对话 → 装 WorkBuddy，把整个解压目录作为项目打开，<code>.workbuddy/memory/</code> 已在包内，WorkBuddy 读后原样接上；再配一次每日 15:25 自动化即可。</li>
+</ol>
+
+<div class="note">⚠️ 安全提示：压缩包含 <code>.workbuddy/memory/</code>（你的品种偏好等），<b>无真实密钥</b>（HTFC 为占位符 undefined）。若上传到公开网盘请知悉这一点。</div>
+
+</body>
+</html>

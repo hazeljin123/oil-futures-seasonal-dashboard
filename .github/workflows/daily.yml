@@ -1,0 +1,46 @@
+name: 每日更新油脂油料期货季节性看板
+
+# 推到 GitHub 后，本工作流会在云端每天自动运行：
+#   1) 抓取新浪期货最新日线收盘价
+#   2) 重建 index.html（GitHub Pages 根目录入口，同时保留中文名副本）
+#   3) 把更新 commit + push 回本仓库
+# 因此"每日更新"由 GitHub 云端完成，不依赖任何人的电脑是否开机。
+on:
+  schedule:
+    # UTC 时间 07:32 = 北京时间 15:32（北京时间 = UTC+8）
+    - cron: '32 7 * * *'
+  workflow_dispatch: {}   # 允许在 GitHub 仓库 Actions 页面手动点 "Run workflow" 触发
+
+permissions:
+  contents: write        # 允许工作流把更新写回仓库
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai   # 让看板里的"数据截至日期"显示北京时间
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 抓取最新收盘并重建看板
+        run: python build_dashboard.py
+
+      - name: 提交并更新仓库
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "数据无变化，跳过提交"
+          else
+            git commit -m "自动更新 $(date +'%Y-%m-%d') 收盘数据"
+            git push
+          fi
