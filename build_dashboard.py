@@ -155,6 +155,58 @@ def latest_data_date(c):
     return best or datetime.date.today().strftime("%Y-%m-%d")
 
 
+# ---------------- 等待新浪放出当日日线 ----------------
+# 新浪期货当日收盘的日线通常在收盘(15:00)后一段时间才挂出，15:32 直接抓会拿到前一天的数据。
+# 因此：工作流仍按 15:32 启动，但脚本会轮询等待当日数据出现后再正式抓取，避免图表总是慢一天。
+WAIT_MAX_MIN = 150      # 最多等待分钟数
+WAIT_INTERVAL_SEC = 300 # 每 5 分钟探测一次
+
+
+def expected_trading_date():
+    """期望的最新交易日：工作日=今天；周末返回 None（不等待，本就没有新数据）"""
+    today = datetime.date.today()
+    if today.weekday() >= 5:   # 5=周六 6=周日
+        return None
+    return today.strftime("%Y-%m-%d")
+
+
+def probe_sina_latest():
+    """轻量探测：只抓几个活跃合约(当/明年 01 合约)，返回新浪当前已放出的最新交易日"""
+    y0 = datetime.date.today().year
+    best = ""
+    for prod in ORDER:
+        for y in (y0, y0 + 1):
+            sym = f"{prod}{str(y)[2:]}01"
+            try:
+                rows = fetch_raw(sym)
+                for row in rows:
+                    d = row.get("d")
+                    if isinstance(d, str) and d > best:
+                        best = d
+            except Exception:
+                continue
+    return best
+
+
+def wait_for_today_data():
+    """在正式抓取前，等待新浪放出当日日线；等到或超时即返回"""
+    expected = expected_trading_date()
+    if not expected:
+        print("[wait] 周末/非交易日，无需等待当日数据")
+        return
+    waited = 0
+    while waited < WAIT_MAX_MIN * 60:
+        latest = probe_sina_latest()
+        if latest >= expected:
+            print(f"[wait] 新浪已放出 {latest} 日线（期望 {expected}），开始抓取")
+            return
+        print(f"[wait] 新浪当日({expected})日线尚未放出(当前最新 {latest or '未知'})，"
+              f"{WAIT_INTERVAL_SEC // 60} 分钟后重试… 已等 {waited // 60} 分钟")
+        time.sleep(WAIT_INTERVAL_SEC)
+        waited += WAIT_INTERVAL_SEC
+    print(f"[wait] 已等待 {WAIT_MAX_MIN} 分钟仍未放出 {expected}（可能节假日），按现有最新数据构建")
+
+
 # ---------------- 计算 ----------------
 # 每个点保留完整日期 "YYYY-MM-DD"，渲染时按各届合约实际生命周期平移对齐(见 JS dispTs)
 def build_price(c):
@@ -546,6 +598,7 @@ header .wrap{padding-bottom:0}
 
 if __name__ == "__main__":
     t0 = time.time()
+    wait_for_today_data()
     c = build_contracts()
     build_html(c)
     print(f"[done] 总耗时 {time.time()-t0:.1f}s")
